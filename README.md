@@ -11,7 +11,7 @@ MBLocationManagerはアプリケーション内で単一のLocationManagerイン
 
 ## LocationManagerの監視
 
-```
+```objectivec
 import "MBLocationManager.h"
 
 @implementation MBViewController {
@@ -48,7 +48,7 @@ import "MBLocationManager.h"
 
 ## 位置情報を一度だけ取得
 
-```
+```objectivec
 - (void)viewDidLoad
 {
 	// MBLocationManagerの初期化
