@@ -8,7 +8,6 @@
 
 @interface MBLocationManager ()
 
-@property (nonatomic) NSUInteger count;
 @property (nonatomic) NSUInteger appRecoveryCount;
 @property (nonatomic, strong) CLLocationManager *locationManager;
 @property (nonatomic, strong) CLLocationManager *appRecoveryLocationManager;
@@ -121,14 +120,14 @@ static MBLocationManager *manager = nil;
 
 - (void)refresh
 {
-    if (_count >= 1) {
-        [_locationManager stopUpdatingLocation];
-    }
+    [_locationManager stopUpdatingLocation];
 
     _locationManager.desiredAccuracy = self.desiredAccuracy;
     _locationManager.distanceFilter = self.distanceFilter;
 
-    [_locationManager startUpdatingLocation];
+    if (_count > 0) {
+        [_locationManager startUpdatingLocation];
+    }
 }
 
 #pragma mark - Setter / Getter

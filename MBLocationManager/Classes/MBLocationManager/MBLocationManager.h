@@ -17,6 +17,7 @@ typedef void (^MBLocationUpdateBlock)(CLLocation *location, NSError *error);
 /* TRUEにセットすると大幅変更位置情報サービス用のCLLocationManagerを起動します */
 @property (nonatomic) BOOL appRecovery;
 
+@property (nonatomic, readonly) NSUInteger count;
 @property (nonatomic, readonly) CLLocationAccuracy desiredAccuracy;
 @property (nonatomic, readonly) CLLocationAccuracy distanceFilter;
 @property (nonatomic, strong, readonly) CLLocationManager *locationManager;
