@@ -14,7 +14,6 @@
 
 @property (strong, nonatomic) IBOutlet MKMapView *mapView;
 @property (strong, nonatomic) IBOutlet UISwitch *updatingLocationSwitch;
-@property (strong, nonatomic) IBOutlet UISwitch *appRecoverySwitch;
 @property (strong, nonatomic) IBOutlet UIButton *retrieveCurrentLocationButton;
 @property (strong, nonatomic) IBOutlet UILabel *counter;
 
@@ -76,34 +75,22 @@
 {
     self.updatingLocationSwitch.selected = !self.updatingLocationSwitch.selected;
 
-    double desiredAccuracy = kCLLocationAccuracyBest;
-    double distanceFilter = kCLLocationAccuracyBest;
+    MBLocationFilter filter= MBLocationFilterMake(kCLLocationAccuracyBest, 1.0);
 
     if (self.updatingLocationSwitch.selected) {
-        [self.locationManager startUpdatingWithDesiredAccuracy:desiredAccuracy distanceFilter:distanceFilter];
+        [self.locationManager startUpdatingWithFilter:filter];
         NSLog(@"Start updating location with desiredAccuracy=%@ distanceFilter=%@",
-                [NSNumber numberWithDouble:desiredAccuracy],
-                [NSNumber numberWithDouble:distanceFilter]);
+                [NSNumber numberWithDouble:filter.accuracy],
+                [NSNumber numberWithDouble:filter.distance]);
     } else {
-        [self.locationManager stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
+        [self.locationManager stopUpdatingWithFilter:filter];
         NSLog(@"Stop updating location with desiredAccuracy=%@ distanceFilter=%@",
-                [NSNumber numberWithDouble:desiredAccuracy],
-                [NSNumber numberWithDouble:distanceFilter]);
+                [NSNumber numberWithDouble:filter.accuracy],
+                [NSNumber numberWithDouble:filter.distance]);
     }
 
-    self.counter.text = [NSString stringWithFormat:@"%u", self.locationManager.count];
+    self.counter.text = [NSString stringWithFormat:@"%d", (int) self.locationManager.count];
 }
-
-- (IBAction)appRecoverySwitchTapped:(id)sender
-{
-    self.appRecoverySwitch.selected = !self.appRecoverySwitch.selected;
-
-    self.locationManager.appRecovery = (self.appRecoverySwitch.selected) ? TRUE : FALSE;
-    NSLog(@"AppRecovery set to %@", [NSNumber numberWithBool:self.locationManager.appRecovery]);
-
-    self.counter.text = [NSString stringWithFormat:@"%u", self.locationManager.count];
-}
-
 
 #pragma mark - MBLocationObserver
 - (void)locationManager:(MBLocationManager *)manager didUpdateLocations:(NSArray *)locations

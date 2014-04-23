@@ -8,21 +8,22 @@
 
 @interface MBLocationManager ()
 
-@property (nonatomic) NSUInteger appRecoveryCount;
 @property (nonatomic, strong) CLLocationManager *locationManager;
-@property (nonatomic, strong) CLLocationManager *appRecoveryLocationManager;
 @property (nonatomic, strong) NSMutableArray *locationUpdateBlocks;
 @property (nonatomic, strong) NSMutableArray *desiredAccuracies;
 @property (nonatomic, strong) NSMutableArray *distanceFilters;
 
 @end
 
+MBLocationFilter MBLocationFilterMake(CLLocationAccuracy accuracy, CLLocationDistance distance) {
+    MBLocationFilter filter = {accuracy, distance};
+    return filter;
+}
 
 static MBLocationManager *manager = nil;
 
 @implementation MBLocationManager {
     NSUInteger _count;
-    NSUInteger _appRecoveryCount;
     NSMutableArray *_desiredAccuracies;
     NSMutableArray *_distanceFilters;
 }
@@ -47,7 +48,6 @@ static MBLocationManager *manager = nil;
     self = [super init];
     if (self) {
         _count = 0;
-        _appRecoveryCount = 0;
         _locationManager = [[CLLocationManager alloc] init];
         _locationManager.delegate = self;
         _observers = [[NSMutableArray alloc] init];
@@ -57,15 +57,15 @@ static MBLocationManager *manager = nil;
     return self;
 }
 
-- (void)startUpdatingWithDesiredAccuracy:(CLLocationAccuracy const)accuracy distanceFilter:(CLLocationAccuracy const)distance
+- (void)startUpdatingWithFilter:(MBLocationFilter)filter
 {
     _count++;
 
     double old_desired_accuracy = self.desiredAccuracy;
     double old_distance_filter = self.distanceFilter;
 
-    self.desiredAccuracy = accuracy;
-    self.distanceFilter = distance;
+    self.desiredAccuracy = filter.accuracy;
+    self.distanceFilter = filter.distance;
 
     double new_desired_accuracy = self.desiredAccuracy;
     double new_distance_filter = self.distanceFilter;
@@ -75,20 +75,20 @@ static MBLocationManager *manager = nil;
     }
 }
 
-- (void)stopUpdatingWithDesiredAccuracy:(CLLocationAccuracy const)accuracy distanceFilter:(CLLocationAccuracy const)distance
+- (void)stopUpdatingWithFilter:(MBLocationFilter)filter
 {
     if (_count > 0) {
         _count--;
 
         NSUInteger idx;
 
-        NSNumber *accuracyNumber = [NSNumber numberWithDouble:accuracy];
+        NSNumber *accuracyNumber = [NSNumber numberWithDouble:filter.accuracy];
         if ([_desiredAccuracies containsObject:accuracyNumber]) {
             idx = [_desiredAccuracies indexOfObject:accuracyNumber];
             [_desiredAccuracies removeObjectAtIndex:idx];
         }
 
-        NSNumber *distanceNumber = [NSNumber numberWithDouble:distance];
+        NSNumber *distanceNumber = [NSNumber numberWithDouble:filter.distance];
         if ([_distanceFilters containsObject:distanceNumber]) {
             idx = [_distanceFilters indexOfObject:distanceNumber];
             [_distanceFilters removeObjectAtIndex:idx];
@@ -107,7 +107,7 @@ static MBLocationManager *manager = nil;
 {
     if (locationUpdateBlock) {
         [_locationUpdateBlocks addObject:locationUpdateBlock];
-        [self startUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
+        [self startUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, kCLLocationAccuracyBest)];
     }
 }
 
@@ -135,31 +135,6 @@ static MBLocationManager *manager = nil;
 - (CLLocationAccuracy)desiredAccuracy
 {
     return [[_desiredAccuracies valueForKeyPath:@"@min.self"] doubleValue];
-}
-
-- (void)setAppRecovery:(BOOL)appRecovery
-{
-    if (appRecovery) {
-        _appRecoveryCount++;
-    } else {
-        if (_appRecoveryCount > 0) {
-            _appRecoveryCount--;
-        }
-    }
-
-    _appRecovery = (_appRecoveryCount > 0) ? TRUE : FALSE;
-
-    if (!_appRecovery) {
-        _appRecoveryLocationManager = nil;
-        return;
-    }
-
-    if (_appRecovery && !_appRecoveryLocationManager) {
-        _appRecoveryLocationManager = [[CLLocationManager alloc] init];
-        _appRecoveryLocationManager.delegate = self;
-    }
-
-    [_appRecoveryLocationManager startMonitoringSignificantLocationChanges];
 }
 
 - (void)setDesiredAccuracy:(CLLocationAccuracy)desiredAccuracy
@@ -206,7 +181,7 @@ static MBLocationManager *manager = nil;
     for (MBLocationUpdateBlock locationUpdateBlock in _locationUpdateBlocks) {
         locationUpdateBlock(_lastLocation, nil);
         [_locationUpdateBlocks removeObject:locationUpdateBlock];
-        [self stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
+        [self stopUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, kCLLocationAccuracyBest)];
     }
 }
 
@@ -223,7 +198,7 @@ static MBLocationManager *manager = nil;
     for (MBLocationUpdateBlock locationUpdateBlock in _locationUpdateBlocks) {
         locationUpdateBlock(nil, error);
         [_locationUpdateBlocks removeObject:locationUpdateBlock];
-        [self stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
+        [self stopUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, kCLLocationAccuracyBest)];
     }
 }
 
