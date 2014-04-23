@@ -10,9 +10,7 @@
 @interface MBLocationManager ()
 
 @property (nonatomic) NSUInteger count;
-@property (nonatomic) NSUInteger appRecoveryCount;
 @property (nonatomic, strong) CLLocationManager *locationManager;
-@property (nonatomic, strong) CLLocationManager *appRecoveryLocationManager;
 @property (nonatomic, strong) NSMutableArray *desiredAccuracies;
 @property (nonatomic, strong) NSMutableArray *distanceFilters;
 @property (nonatomic, strong) NSMutableArray *locationUpdateBlocks;
@@ -56,10 +54,10 @@
     XCTAssertTrue([manager1 isKindOfClass:[MBLocationManager class]]);
     XCTAssertTrue([manager1.locationManager isKindOfClass:[CLLocationManager class]]);
     XCTAssertEqualObjects(manager1.locationManager.delegate, manager1);
-    
+
     MBLocationManager *manager2 = [MBLocationManager sharedManager];
     XCTAssertTrue([manager2 isKindOfClass:[MBLocationManager class]]);
-    
+
     XCTAssertEqualObjects(manager1, manager2);
 }
 
@@ -91,30 +89,30 @@
 
 - (void)testDistanceFilter
 {
-    locationManager.distanceFilter = kCLLocationAccuracyThreeKilometers;
-    XCTAssert([locationManager.distanceFilters count] == 1);
+    locationManager.distanceFilter = 3000.0;
+    XCTAssertTrue([locationManager.distanceFilters count] == 1);
 
-    locationManager.distanceFilter = kCLLocationAccuracyKilometer;
+    locationManager.distanceFilter = 1000.0;
     XCTAssert([locationManager.distanceFilters count] == 2);
 
-    XCTAssert(locationManager.distanceFilter == kCLLocationAccuracyKilometer);
+    XCTAssert(locationManager.distanceFilter == 1000.0);
 }
 
 - (void)testStartUpdating
 {
-    [locationManager startUpdatingWithDesiredAccuracy:kCLLocationAccuracyKilometer distanceFilter:kCLLocationAccuracyKilometer];
+    [locationManager startUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyKilometer, 1000.0)];
     XCTAssert([locationManager.desiredAccuracies count] == 1);
     XCTAssert(locationManager.desiredAccuracy == kCLLocationAccuracyKilometer);
     XCTAssert([locationManager.distanceFilters count] == 1);
-    XCTAssert(locationManager.distanceFilter == kCLLocationAccuracyKilometer);
+    XCTAssert(locationManager.distanceFilter == 1000.0);
 
     XCTAssert(locationManager.count == 1);
 
-    [locationManager startUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyNearestTenMeters];
+    [locationManager startUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, 10.0)];
     XCTAssert([locationManager.desiredAccuracies count] == 2);
     XCTAssert(locationManager.desiredAccuracy == kCLLocationAccuracyBest);
     XCTAssert([locationManager.distanceFilters count] == 2);
-    XCTAssert(locationManager.distanceFilter == kCLLocationAccuracyNearestTenMeters);
+    XCTAssert(locationManager.distanceFilter == 10.0);
 
     XCTAssert(locationManager.count == 2);
 }
@@ -123,25 +121,25 @@
 {
     // カウンタチェック
     XCTAssert(locationManager.count == 0);
-    [locationManager stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyNearestTenMeters distanceFilter:kCLLocationAccuracyBest];
+    [locationManager stopUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyNearestTenMeters, 1.0)];
 
     // 精度チェック
-    [locationManager startUpdatingWithDesiredAccuracy:kCLLocationAccuracyThreeKilometers distanceFilter:kCLLocationAccuracyThreeKilometers];
-    [locationManager startUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
-    [locationManager startUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
-    XCTAssert(locationManager.distanceFilter == kCLLocationAccuracyBest);
+    [locationManager startUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyThreeKilometers, 3000.0)];
+    [locationManager startUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, 1.0)];
+    [locationManager startUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, 1.0)];
     XCTAssert(locationManager.desiredAccuracy == kCLLocationAccuracyBest);
+    XCTAssert(locationManager.distanceFilter == 1.0);
 
-    [locationManager stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
-    XCTAssert(locationManager.distanceFilter == kCLLocationAccuracyBest);
+    [locationManager stopUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, 1.0)];
     XCTAssert(locationManager.desiredAccuracy == kCLLocationAccuracyBest);
+    XCTAssert(locationManager.distanceFilter == 1.0);
 
-    [locationManager stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
+    [locationManager stopUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, 1.0)];
     XCTAssert(locationManager.count == 1);
-    XCTAssert(locationManager.distanceFilter == kCLLocationAccuracyThreeKilometers);
     XCTAssert(locationManager.desiredAccuracy == kCLLocationAccuracyThreeKilometers);
+    XCTAssert(locationManager.distanceFilter == 3000.0);
 
-    [locationManager stopUpdatingWithDesiredAccuracy:kCLLocationAccuracyBest distanceFilter:kCLLocationAccuracyBest];
+    [locationManager stopUpdatingWithFilter:MBLocationFilterMake(kCLLocationAccuracyBest, 1.0)];
     XCTAssert(locationManager.count == 0);
 }
 
@@ -165,46 +163,11 @@
     XCTAssertEqualObjects(locationManager.lastLocation, location);
 }
 
-- (void)testAppRecovery
-{
-    // 初期状態ではapp recoveryオフ
-    XCTAssertFalse(locationManager.appRecovery);
-    XCTAssertTrue(locationManager.appRecoveryCount == 0);
-    XCTAssertNil(locationManager.appRecoveryLocationManager);
-
-    // カウンタチェック
-    [locationManager setAppRecovery:TRUE];
-
-    XCTAssertTrue(locationManager.appRecovery);
-    XCTAssertTrue(locationManager.appRecoveryCount == 1);
-    XCTAssert(locationManager.appRecoveryLocationManager);
-
-    [locationManager setAppRecovery:TRUE];
-
-    XCTAssertTrue(locationManager.appRecovery);
-    XCTAssertTrue(locationManager.appRecoveryCount == 2);
-    XCTAssert(locationManager.appRecoveryLocationManager);
-
-    // カウンタチェック
-    [locationManager setAppRecovery:FALSE];
-
-    XCTAssertTrue(locationManager.appRecovery);
-    XCTAssertTrue(locationManager.appRecoveryCount == 1);
-    XCTAssert(locationManager.appRecoveryLocationManager);
-
-    // カウンタがゼロになったらlocation managerを破棄
-    [locationManager setAppRecovery:FALSE];
-
-    XCTAssertTrue(locationManager.appRecoveryCount == 0);
-    XCTAssertFalse(locationManager.appRecovery);
-    XCTAssertNil(locationManager.appRecoveryLocationManager);
-}
-
 - (void)testRetrieveLocationWithBlock
 {
     __block CLLocation *newLocation = nil;
     __block NSError *newError = nil;
-    void (^b)(CLLocation *location, NSError *error) = ^(CLLocation *location, NSError *error) {
+    void (^b)(CLLocation *, NSError *) = ^(CLLocation *location, NSError *error) {
         newLocation = location;
         newError = error;
     };
@@ -237,6 +200,13 @@
     [locationManager retrieveLocationWithBlock:nil];
     XCTAssertTrue([locationManager.locationUpdateBlocks count] == 0);
     XCTAssertTrue(locationManager.count == 0);
+}
+
+- (void)testMBLocationFilterMake
+{
+    MBLocationFilter filter = MBLocationFilterMake(kCLLocationAccuracyBest, 10.0);
+    XCTAssertEqual(filter.accuracy, kCLLocationAccuracyBest, @"");
+    XCTAssertEqual(filter.distance, 10.0, @"");
 }
 
 @end

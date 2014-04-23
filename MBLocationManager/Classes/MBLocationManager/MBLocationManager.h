@@ -9,17 +9,20 @@
 @protocol MBLocationObserver;
 
 
+typedef struct {
+    CLLocationAccuracy accuracy;
+    CLLocationDistance distance;
+} MBLocationFilter;
 typedef void (^MBLocationUpdateBlock)(CLLocation *location, NSError *error);
+
+MBLocationFilter MBLocationFilterMake(CLLocationAccuracy accuracy, CLLocationDistance distance);
 
 
 @interface MBLocationManager : NSObject <CLLocationManagerDelegate>
 
-/* TRUEにセットすると大幅変更位置情報サービス用のCLLocationManagerを起動します */
-@property (nonatomic) BOOL appRecovery;
-
 @property (nonatomic, readonly) NSUInteger count;
 @property (nonatomic, readonly) CLLocationAccuracy desiredAccuracy;
-@property (nonatomic, readonly) CLLocationAccuracy distanceFilter;
+@property (nonatomic, readonly) CLLocationDistance distanceFilter;
 @property (nonatomic, strong, readonly) CLLocationManager *locationManager;
 @property (nonatomic, strong, readonly) NSMutableArray *observers;
 @property (nonatomic, strong, readonly) CLLocation *lastLocation;
@@ -30,10 +33,10 @@ typedef void (^MBLocationUpdateBlock)(CLLocation *location, NSError *error);
 + (instancetype)sharedManager;
 
 /* 指定された精度で位置情報取得を開始します */
-- (void)startUpdatingWithDesiredAccuracy:(CLLocationAccuracy const)accuracy distanceFilter:(CLLocationAccuracy const)distance;
+- (void)startUpdatingWithFilter:(MBLocationFilter)filter;
 
 /* 指定された精度の位置情報取得を停止します */
-- (void)stopUpdatingWithDesiredAccuracy:(CLLocationAccuracy const)accuracy distanceFilter:(CLLocationAccuracy const)distance;
+- (void)stopUpdatingWithFilter:(MBLocationFilter)filter;
 
 /* 1度だけ最高の精度で位置情報を取得します。 */
 - (void)retrieveLocationWithBlock:(MBLocationUpdateBlock)locationUpdateBlock;
