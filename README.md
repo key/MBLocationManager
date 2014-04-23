@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/key/MBLocationManager.svg?branch=develop)](https://travis-ci.org/key/MBLocationManager)
+
 MBLocationManager
 =================
 
