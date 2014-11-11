@@ -1,7 +1,7 @@
 PROJECT=MBLocationManager.xcodeproj
 SCHEME=MBLocationManager
 
-defualt: clean build test
+default: clean build test
 
 clean:
 	xctool -project ${PROJECT} -scheme ${SCHEME} clean
@@ -10,5 +10,5 @@ build:
 	xctool -project ${PROJECT} -scheme ${SCHEME} build -sdk iphonesimulator
 
 test:
-	xctool -project ${PROJECT} -scheme ${SCHEME} test -test-sdk iphonesimulator -parallelize
+	xctool -project ${PROJECT} -scheme ${SCHEME} test -test-sdk iphonesimulator -parallelize ONLY_ACTIVE_ARCH=NO
 
