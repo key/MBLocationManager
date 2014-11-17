@@ -37,7 +37,7 @@ add-certificates: decrypt-certificates
 # decrypt_certificates - 暗号化されたファイルを復号化する
 decrypt-certificates:
 	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/profile/$(PROVISIONING_PROFILE).enc -d -a -out scripts/profile/$(PROVISIONING_PROFILE)
-	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/certs/dist.p12.enc -d -a -out scripts/certs/dist.p12
+	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/certs/dist.cer.enc -d -a -out scripts/certs/dist.cer
 	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/certs/dist.p12.enc -d -a -out scripts/certs/dist.p12
 
 # archive - IPA ファイルを生成する
