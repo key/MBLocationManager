@@ -4,7 +4,3 @@ before_install:
 - if brew outdated | grep -qx xctool; then brew upgrade xctool; fi
 script:
 - make test
-- make build
-env:
-  global:
-  - secure: DpPNxTJmzdgn2mRdyRsIw8I+zLkqfyloOh/TzrSxTD/XNcXS1T0h1kVKtml7WUE2yg+SamBsoPxudDCqpV4Py5R1avz5Idpb1BWKMPB6hgwPz+HEljHq9RZhCB2lhK+jY6TuzG1zQPnnhAUa/H8hiI7YswXSkju5SE5Ij8Agrg4=
