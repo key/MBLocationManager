@@ -7,4 +7,4 @@ script:
 - make build
 env:
   global:
-    secure: HyqIY0spevu1ezSEGmD+m6Bz9DW0diNGabrVaYuhI3epp+W7Wip357vtTiK0WaJ9OwE0hVfdOxNuFmZj5A8U8mBtl2vwStRi5IlcnFm+r3eNP6MSR11UllnWqy8oOJYsh+lUVP699Q8LT4LLq13wCUGLYdwtqhDPGXE+LD8Qx04=
+  - secure: DpPNxTJmzdgn2mRdyRsIw8I+zLkqfyloOh/TzrSxTD/XNcXS1T0h1kVKtml7WUE2yg+SamBsoPxudDCqpV4Py5R1avz5Idpb1BWKMPB6hgwPz+HEljHq9RZhCB2lhK+jY6TuzG1zQPnnhAUa/H8hiI7YswXSkju5SE5Ij8Agrg4=
