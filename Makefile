@@ -1,6 +1,8 @@
 PROJECT=MBLocationManager.xcodeproj
 SCHEME=MBLocationManager
 
+PROVISIONING_PROFILE=MBLocationManager_AdHoc.mobileprovision
+
 default: clean build test
 
 clean:
@@ -37,14 +39,6 @@ decrypt-certificates:
 	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/profile/$(PROVISIONING_PROFILE).enc -d -a -out scripts/profile/$(PROVISIONING_PROFILE)
 	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/certs/dist.p12.enc -d -a -out scripts/certs/dist.p12
 	openssl aes-256-cbc -k "$(ENCRYPTION_SECRET)" -in scripts/certs/dist.p12.enc -d -a -out scripts/certs/dist.p12
-
-# archive - IPA ファイルを生成する
-archive: build
-	xcrun \
-		-sdk $(SDK) \
-		PackageApplication $(APP_NAME) \
-		-o $(IPA_NAME) \
-		-embed ~/Library/MobileDevice/Provisioning\ Profiles/$(PROVISIONING_PROFILE)
 
 # archive - IPA ファイルを生成する
 archive: build
