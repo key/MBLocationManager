@@ -15,9 +15,13 @@ DSYM_ZIP=$(PWD)/$(SCHEME)/out/$(SCHEME).dSYM.zip
 
 default: clean build test
 
+clean:
+	xctool -project ${PROJECT} -scheme ${SCHEME} clean
+
+
 test: clean
 	xctool -project ${PROJECT} -scheme ${SCHEME} test -test-sdk iphonesimulator -parallelize ONLY_ACTIVE_ARCH=NO
 
-build:
+build: clean
 	xctool -project ${PROJECT} -scheme ${SCHEME} build -sdk iphonesimulator
 
